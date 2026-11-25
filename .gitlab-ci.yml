@@ -1,39 +1,37 @@
-# Publishes the Plotmark website with GitLab Pages.
-# Every time you commit to the default branch (usually "main"), the site updates.
+# Plotmark website on GitLab Pages.
+# - Every commit to main republishes the site.
+# - A weekly schedule (and any commit message containing [market]) refreshes
+#   the Dubai market trends page from Dubai Land Department open data.
+stages: [build, deploy]
+
+market-data:
+  stage: build
+  image: python:3.12-slim
+  timeout: 45m
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+    - if: $CI_COMMIT_MESSAGE =~ /\[market\]/
+  script:
+    - python3 scripts/market/fetch.py
+  artifacts:
+    paths: [market-data/]
+    expire_in: 30 days
+
 pages:
   stage: deploy
+  image: python:3.12-slim
+  needs:
+    - job: market-data
+      optional: true
+      artifacts: true
   script:
+    - python3 scripts/market/render.py
     - mkdir .public
     - cp -r * .public
+    - rm -rf .public/scripts .public/market-data .public/README.md
     - mv .public public
   artifacts:
     paths:
       - public
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-
-dld-probe:
-  image: python:3.12-slim
-  stage: test
-  rules:
-    - if: $CI_COMMIT_MESSAGE =~ /\[dld-probe\]/
-  script:
-    - |
-      cat > /tmp/probe.py <<'PYEOF'
-      import json, urllib.request, collections, time, sys
-      H={'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36',
-         'Accept':'application/json, text/plain, */*','Content-Type':'application/json','Origin':'https://dubailand.gov.ae','Referer':'https://dubailand.gov.ae/'}
-      def post(ep,body):
-          r=urllib.request.Request('https://gateway.dubailand.gov.ae/open-data/'+ep,data=json.dumps(body).encode(),headers=H,method='POST')
-          with urllib.request.urlopen(r,timeout=60) as f: return json.load(f)
-      tb={"P_FROM_DATE":"10/01/2026","P_TO_DATE":"10/31/2026","P_GROUP_ID":"1","P_IS_OFFPLAN":"","P_IS_FREE_HOLD":"","P_AREA_ID":"","P_USAGE_ID":"","P_PROP_TYPE_ID":"","P_SORT":"TRANSACTION_NUMBER_ASC","P_TAKE":"5000","P_SKIP":"0"}
-      d=post('transactions',tb); rows=d['response']['result']
-      print('TX total',rows[0]['TOTAL'] if rows else 0,'got',len(rows)); print('sample',json.dumps(rows[0])[:900])
-      c=collections.Counter((r.get('AREA_EN'),r.get('MASTER_PROJECT_EN')) for r in rows)
-      for k,v in c.most_common(80): print('AREA',k,v)
-      time.sleep(2)
-      rb={"P_DATE_TYPE":"0","P_FROM_DATE":"10/01/2026","P_TO_DATE":"10/03/2026","P_VERSION":"","P_IS_FREE_HOLD":"","P_USAGE_ID":"","P_AREA_ID":"","P_PROP_TYPE_ID":"","P_SORT":"REGISTRATION_DATE_ASC","P_TAKE":"5","P_SKIP":"0"}
-      d=post('rents',rb); rows=d['response']['result']
-      print('RENT total',rows[0]['TOTAL'] if rows else 0); print('rsample',json.dumps(rows[0])[:900] if rows else None)
-      PYEOF
-    - python3 /tmp/probe.py
