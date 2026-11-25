@@ -101,7 +101,7 @@ def main():
     menu_js = re.search(r"<script>\n\(function\(\)\{\n  var t=document.getElementById\('menu-toggle'\).*?</script>", body, flags=re.S).group(0)
 
     title = 'Dubai Property Market Trends (Updated Weekly) | Plotmark Real Estate'
-    desc = 'Dubai property market trends from Dubai Land Department data, updated weekly: sales volumes, off-plan share, price per sq ft and rents in Dubai Marina, Downtown, Business Bay, JVC and more.'
+    desc = 'Dubai property sales, prices per sq ft and rents by community, updated weekly from Dubai Land Department data: Dubai Marina, Downtown, Business Bay, JVC and more.'
     if data:
         d = data['dubai']; upd = dlong(data['generated_at'])
         p1 = f"{dlong(d['period_sales'][0])} – {dlong(d['period_sales'][1])}"
