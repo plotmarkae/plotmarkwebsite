@@ -1,0 +1,13 @@
+# Publishes the Plotmark website with GitLab Pages.
+# Every time you commit to the default branch (usually "main"), the site updates.
+pages:
+  stage: deploy
+  script:
+    - mkdir .public
+    - cp -r * .public
+    - mv .public public
+  artifacts:
+    paths:
+      - public
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
