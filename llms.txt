@@ -23,3 +23,8 @@
 ## Pages
 - [Home](https://plotmark.ae/): services, communities, how it works, FAQ and enquiry form
 - [Dubai mortgage calculator](https://plotmark.ae/mortgages/): monthly payment, maximum loan under UAE Central Bank limits (80% first home up to AED 5M for expatriates, 70% above; 50% off-plan; 50% debt burden ratio; 25-year maximum term), and upfront costs (4% DLD transfer fee, 0.25% + AED 290 mortgage registration, trustee fee). Plotmark is a real estate brokerage, not a mortgage broker.
+- [Insights](https://plotmark.ae/insights/): Dubai property guides
+  - [Off-plan vs ready property in Dubai: which suits you?](https://plotmark.ae/insights/off-plan-vs-ready-property-dubai/): How buying off-plan and buying ready compare on price, payment, risk, financing and timing, and the questions to ask before you choose.
+  - [The full cost of buying property in Dubai (2026)](https://plotmark.ae/insights/cost-of-buying-property-dubai/): Beyond the price: the Dubai Land Department fee, trustee and title deed charges, mortgage costs and other fees, with a worked example.
+  - [Renting a home in Dubai: a step-by-step guide](https://plotmark.ae/insights/renting-a-home-in-dubai/): From setting a budget to Ejari and moving in, plus the rules on rent increases that every tenant should know.
+  - [Dubai mortgage rules explained: how much can you borrow?](https://plotmark.ae/insights/dubai-mortgage-rules-explained/): Loan-to-value limits, the 50% debt burden ratio, maximum terms and what banks look at, in plain English.
