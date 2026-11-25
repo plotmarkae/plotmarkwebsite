@@ -220,6 +220,11 @@ header.site{background:rgba(248,243,238,.72)}
   *,*::before,*::after{animation:none!important;transition:none!important}
   .js .reveal,.js .map .mp{opacity:1;transform:none}
 }
+
+.thanks{display:flex;gap:16px;align-items:flex-start;padding:22px;border-radius:18px;background:var(--paper);border:1px solid var(--line)}
+.thanks h3{font-size:22px;letter-spacing:-.03em}
+.thanks p{color:var(--muted);font-size:15px;margin-top:4px}
+form.enq.sent label,form.enq.sent .btn,form.enq.sent #form-note{display:none}
 </style>
 </head>
 <body>
@@ -456,9 +461,9 @@ header.site{background:rgba(248,243,238,.72)}
       <div class="cline"><div class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2F2A25" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 6l-10 7L2 6"/></svg></div><div><b>Email</b><span>enquiries@plotmark.ae</span></div></div>
       <div class="cline"><div class="ico"><svg width="20" height="20" viewBox="0 0 34 34" aria-hidden="true"><use href="#pin" fill="#2F2A25"/></svg></div><div><b>Office</b><span>Sheikh Zayed Road, Dubai, UAE</span></div></div>
     </div>
-    <form class="reveal enq" name="enquiry" method="POST" data-netlify="true" netlify-honeypot="company">
-      <input type="hidden" name="form-name" value="enquiry">
-      <p hidden><label>Leave this empty<input name="company"></label></p>
+    <form class="reveal enq" id="enquiry-form" action="https://formspree.io/f/xvkadeey" method="POST">
+      <input type="hidden" name="_subject" value="New enquiry from plotmark.ae">
+      <p hidden><label>Leave this empty<input type="text" name="_gotcha" tabindex="-1" autocomplete="off"></label></p>
       <label>Full name<input name="name" type="text" autocomplete="name" required></label>
       <label>Email<input name="email" type="email" autocomplete="email" required></label>
       <label>Phone (optional)<input name="phone" type="tel" autocomplete="tel"></label>
@@ -476,7 +481,11 @@ header.site{background:rgba(248,243,238,.72)}
       <label class="full">Message<textarea name="message" rows="4" placeholder="Area, property type, budget or timeline"></textarea></label>
       <div class="full" style="display:flex;flex-wrap:wrap;align-items:center;gap:14px">
         <button class="btn btn-ink" type="submit">Send enquiry</button>
-        <span class="note">Sent to enquiries@plotmark.ae.</span>
+        <span class="note" id="form-note" role="status" aria-live="polite">Sent to enquiries@plotmark.ae.</span>
+      </div>
+      <div class="full thanks" id="form-thanks" hidden>
+        <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><use href="#pin" fill="#E8A33D"/></svg>
+        <div><h3>Thank you.</h3><p>Your enquiry has reached the Plotmark team. We'll reply by email shortly.</p></div>
       </div>
     </form>
   </div>
@@ -522,6 +531,25 @@ header.site{background:rgba(248,243,238,.72)}
   if(!('IntersectionObserver' in window)){var a=document.querySelectorAll('.reveal,.map');for(var i=0;i<a.length;i++)a[i].classList.add('in');return;}
   var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{threshold:.15});
   var els=document.querySelectorAll('.reveal,.map');for(var i=0;i<els.length;i++)io.observe(els[i]);
+})();
+
+(function(){
+  var f=document.getElementById('enquiry-form');
+  if(!f||!window.fetch||!window.FormData)return;
+  var note=document.getElementById('form-note'),btn=f.querySelector('button[type=submit]');
+  f.addEventListener('submit',function(e){
+    e.preventDefault();
+    btn.disabled=true;btn.textContent='Sending…';
+    fetch(f.action,{method:'POST',body:new FormData(f),headers:{'Accept':'application/json'}})
+      .then(function(r){
+        if(r.ok){f.classList.add('sent');document.getElementById('form-thanks').hidden=false;f.reset();}
+        else{throw new Error('send failed');}
+      })
+      .catch(function(){
+        btn.disabled=false;btn.textContent='Send enquiry';
+        note.textContent='Sorry, that did not send. Please email enquiries@plotmark.ae directly.';
+      });
+  });
 })();
 </script>
 </body>
