@@ -22,3 +22,4 @@
 
 ## Pages
 - [Home](https://plotmark.ae/): services, communities, how it works, FAQ and enquiry form
+- [Dubai mortgage calculator](https://plotmark.ae/mortgages/): monthly payment, maximum loan under UAE Central Bank limits (80% first home up to AED 5M for expatriates, 70% above; 50% off-plan; 50% debt burden ratio; 25-year maximum term), and upfront costs (4% DLD transfer fee, 0.25% + AED 290 mortgage registration, trustee fee). Plotmark is a real estate brokerage, not a mortgage broker.
