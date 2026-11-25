@@ -1,0 +1,62 @@
+# Plotmark website on GitHub Pages (replaces .gitlab-ci.yml).
+# - Every push to main republishes the site.
+# - Every Monday (and any commit message containing [market]) the Dubai market
+#   trends page is refreshed from Dubai Land Department open data.
+# - "Run workflow" on the Actions tab does a manual refresh + publish.
+name: Publish site
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '17 3 * * 1'   # Mondays 07:17 Dubai time
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Refresh market data
+        if: github.event_name != 'push' || contains(github.event.head_commit.message, '[market]')
+        continue-on-error: true   # if DLD is down, render.py falls back to the live data.json
+        timeout-minutes: 45
+        run: python3 scripts/market/fetch.py
+
+      - name: Render market page
+        run: python3 scripts/market/render.py
+
+      - name: Assemble site
+        run: |
+          mkdir _site
+          rsync -a --exclude '.*' --exclude '_site' --exclude 'scripts' \
+                --exclude 'market-data' --exclude 'README.md' ./ _site/
+
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
