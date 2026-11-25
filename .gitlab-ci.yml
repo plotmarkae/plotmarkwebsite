@@ -16,7 +16,7 @@ dld-probe:
   image: python:3.12-slim
   stage: test
   rules:
-    - if: $DLD_PROBE == "1"
+    - if: $CI_COMMIT_MESSAGE =~ /\[dld-probe\]/
   script:
     - |
       cat > /tmp/probe.py <<'PYEOF'
