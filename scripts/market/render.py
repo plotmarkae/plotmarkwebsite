@@ -19,8 +19,8 @@ def bn(n):
     return f'AED {n/1e9:,.1f}bn' if n >= 1e9 else f'AED {n/1e6:,.0f}m'
 def dlong(iso): return dt.date.fromisoformat(iso[:10]).strftime('%-d %B %Y')
 
-def columns(months):
-    W, H, L, B, T = 960, 300, 56, 34, 24
+def columns(months, W=960, H=300, cls='chart'):
+    L, B, T = (56, 34, 24) if W > 600 else (40, 30, 22)
     vals = [m['sales'] for m in months]
     mx = max(vals) if vals else 1
     step = 5000 if mx > 15000 else (2000 if mx > 6000 else 1000)
@@ -43,7 +43,7 @@ def columns(months):
         if i in (imax, n - 1):
             g.append(f'<text x="{cx:.1f}" y="{yy-8:.1f}" text-anchor="middle" font-size="12" font-weight="600" fill="#2F2A25">{m["sales"]:,}</text>')
     g.append(f'<line x1="{L}" x2="{W}" y1="{H-B}" y2="{H-B}" stroke="#BDB3A7" stroke-width="1"/>')
-    return f'<svg viewBox="0 0 {W} {H}" role="img" aria-label="Registered property sales in Dubai by month this year" class="chart">{"".join(g)}</svg>'
+    return f'<svg viewBox="0 0 {W} {H}" role="img" aria-label="Registered property sales in Dubai by month this year" class="{cls}">{"".join(g)}</svg>'
 
 def comm_rows(comm):
     mx = max([c['median_psf'] for c in comm if c['median_psf']] or [1])
@@ -51,7 +51,7 @@ def comm_rows(comm):
     for c in comm:
         w = 100 * (c['median_psf'] or 0) / mx
         bar = f'<span class="ib"><span style="width:{w:.0f}%"></span></span>' if c['median_psf'] else ''
-        out.append(f'<tr><th scope="row">{html.escape(c["name"])}</th><td>{num(c["sales"])}</td><td class="psf">{bar}<b>{aed(c["median_psf"])}</b></td><td>{pct(c["offplan_share"])}</td><td>{aed(c["median_rent_flat"])}</td></tr>')
+        out.append(f'<tr><th scope="row">{html.escape(c["name"])}</th><td data-l="Sales">{num(c["sales"])}</td><td class="psf" data-l="Price per sq ft">{bar}<b>{aed(c["median_psf"])}</b></td><td data-l="Off-plan">{pct(c["offplan_share"])}</td><td data-l="Annual rent (flat)">{aed(c["median_rent_flat"])}</td></tr>')
     return ''.join(out)
 
 CSS = '''
@@ -78,7 +78,14 @@ CSS = '''
 .method{font-size:13.5px;color:var(--muted);line-height:1.7;max-width:56rem}
 .method a{color:var(--charcoal)}
 @media (max-width:1000px){.kpis5{grid-template-columns:repeat(2,minmax(0,1fr))}.kpis5 .kpi:first-child{grid-column:1/-1}}
-@media (max-width:520px){.ib{width:50px}.mtable{font-size:14px}}
+.chart-m{display:none}
+@media (max-width:640px){.chart:not(.chart-m){display:none}.chart-m{display:block}
+.mtable.cm thead{display:none}.mtable.cm,.mtable.cm tbody,.mtable.cm tr{display:block}
+.mtable.cm tr{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px;padding:16px 0;border-bottom:1px solid var(--line)}
+.mtable.cm th[scope=row]{grid-column:1/-1;border:0;padding:0;font-size:16px}
+.mtable.cm td{border:0;padding:0;text-align:left;white-space:normal;display:block;font-size:15px;font-weight:600}
+.mtable.cm td::before{content:attr(data-l);display:block;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--saffron-text);font-weight:600;margin-bottom:3px}
+.mtable.cm .psf{display:block}.mtable.cm .ib{display:none}}
 '''
 
 def main():
@@ -122,7 +129,7 @@ def main():
     <div class="chart-card">
       <h2 id="c1">Registered sales by month, {data['months'][0]['month'][:4]}</h2>
       <p class="sub">All property sale transactions registered with the Dubai Land Department.</p>
-      {columns(ym)}
+      {columns(ym)}{columns(ym, 380, 260, 'chart chart-m')}
       <p class="legend-note"><span><i style="background:#94590C"></i>Full month</span><span><i style="background:#D2C5B3"></i>Month to date</span></p>
       <details style="margin-top:14px"><summary style="cursor:pointer;font-size:14px;font-weight:600">View as table</summary>
         <div class="scroll"><table class="mtable" style="margin-top:10px"><thead><tr><th>Month</th><th>Sales</th><th>Off-plan share</th></tr></thead><tbody>{tbl_months}</tbody></table></div>
@@ -135,7 +142,7 @@ def main():
     <div class="chart-card">
       <h2 id="c2">Communities we cover</h2>
       <p class="sub">Sales and prices: {p1}. Rents: {p2}. Medians shown where there are at least 10 records.</p>
-      <div class="scroll"><table class="mtable">
+      <div class="scroll"><table class="mtable cm">
         <thead><tr><th>Community</th><th>Sales</th><th>Median price per sq ft (units)</th><th>Off-plan share</th><th>Median annual rent (flats)</th></tr></thead>
         <tbody>{comm_rows(data['communities'])}</tbody>
       </table></div>
