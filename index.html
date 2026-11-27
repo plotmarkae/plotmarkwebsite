@@ -729,6 +729,19 @@ form.enq.sent label,form.enq.sent .btn,form.enq.sent #form-note{display:none}
   var els=document.querySelectorAll('.reveal,.map');for(var i=0;i<els.length;i++)io.observe(els[i]);
 })();
 
+/* Website enquiries -> Plotmark CRM (Supabase). The public key below can only add an
+   enquiry through submit_website_lead; it cannot read any CRM data. */
+var CRM_URL='https://xkyxwfdgnkvmmwanegax.supabase.co',CRM_KEY='sb_publishable_haAnDdVKW9zlIZZa32TQHw_lWCAjMmF';
+function sendToCrm(fd){
+  if((fd.get('_gotcha')||'').trim())return Promise.resolve(false);
+  var choice=fd.get('interest')||'';
+  var map={'Buying a ready property':'Buy','Buying off-plan':'Off-plan','Renting a home':'Rent','Selling my property':'Sell','Letting my property':'Let'};
+  var body={p_name:fd.get('name')||'',p_email:fd.get('email')||'',p_phone:fd.get('phone')||null,
+    p_interest:map[choice]||choice||null,p_message:fd.get('message')||null,p_page:location.pathname};
+  return fetch(CRM_URL+'/rest/v1/rpc/submit_website_lead',{method:'POST',
+    headers:{'Content-Type':'application/json','apikey':CRM_KEY,'Authorization':'Bearer '+CRM_KEY},
+    body:JSON.stringify(body)}).then(function(r){return r.ok;}).catch(function(){return false;});
+}
 (function(){
   var f=document.getElementById('enquiry-form');
   if(!f||!window.fetch||!window.FormData)return;
@@ -736,9 +749,15 @@ form.enq.sent label,form.enq.sent .btn,form.enq.sent #form-note{display:none}
   f.addEventListener('submit',function(e){
     e.preventDefault();
     btn.disabled=true;btn.textContent='Sending…';
-    fetch(f.action,{method:'POST',body:new FormData(f),headers:{'Accept':'application/json'}})
-      .then(function(r){
-        if(r.ok){f.classList.add('sent');document.getElementById('form-thanks').hidden=false;f.reset();}
+    var fd=new FormData(f);
+    // 1) email copy to enquiries@plotmark.ae (Formspree)
+    var mail=fetch(f.action,{method:'POST',body:fd,headers:{'Accept':'application/json'}})
+      .then(function(r){if(!r.ok)throw new Error('mail');return true;});
+    // 2) new lead in the Plotmark CRM (skipped for spam bots that fill the hidden field)
+    var crm=sendToCrm(fd);
+    Promise.all([mail.catch(function(){return false;}),crm])
+      .then(function(res){
+        if(res[0]||res[1]){f.classList.add('sent');document.getElementById('form-thanks').hidden=false;f.reset();}
         else{throw new Error('send failed');}
       })
       .catch(function(){
