@@ -193,6 +193,10 @@ def main():
         valuation_page(data)
     except Exception as e:
         print('valuation page skipped:', e)
+    try:
+        homepage(data)
+    except Exception as e:
+        print('homepage market band skipped:', e)
 
 # ====================== Valuation page: "What's my property worth?" ======================
 VCSS = '''
@@ -394,6 +398,61 @@ def valuation_page(market):
     open('valuation/index.html', 'w').write(page)
     if data and not data.get('fallback'): json.dump(data, open('valuation/data.json', 'w'), separators=(',', ':'))
     print('rendered valuation page from', state, 'data')
+
+# ====================== Homepage: live market band and price ticker ======================
+def spark(months, W=320, H=110):
+    vals = [m['sales'] for m in months] or [0]
+    mx = max(vals) or 1; n = len(months); slot = W / max(n, 1); bw = min(16, slot * .55)
+    g = []
+    for i, m in enumerate(months):
+        h = (H - 22) * m['sales'] / mx; x = slot * i + (slot - bw) / 2; y = H - 18 - h
+        col = '#D2C5B3' if m.get('partial') else ('#E8A33D' if i == n - 1 or (i == n - 2 and months[-1].get('partial')) else '#94590C')
+        g.append(f'<rect x="{x:.1f}" y="{y:.1f}" width="{bw:.1f}" height="{h:.1f}" rx="3" fill="{col}"><title>{m["label"]}: {m["sales"]:,} sales</title></rect>')
+        g.append(f'<text x="{x + bw / 2:.1f}" y="{H - 4}" text-anchor="middle" font-size="10" fill="#6B6259">{m["label"][0]}</text>')
+    return f'<svg viewBox="0 0 {W} {H}" role="img" aria-label="Registered sales in Dubai by month this year">{"".join(g)}</svg>'
+
+def homepage(data):
+    if not data or not os.path.exists('index.html'): return
+    s = open('index.html').read()
+    if '<!--PULSE-->' not in s: return
+    d = data['dubai']; months = data.get('months') or []
+    full = [m for m in months if not m.get('partial')]
+    chg = ''
+    if len(full) >= 2 and full[-2]['sales']:
+        pc = 100 * (full[-1]['sales'] - full[-2]['sales']) / full[-2]['sales']
+        cls = 'up' if pc >= 0 else 'down'; arrow = '▲' if pc >= 0 else '▼'
+        chg = f'<p class="chg"><b>{full[-1]["sales"]:,}</b> sales in {dt.date.fromisoformat(full[-1]["month"] + "-01").strftime("%B")} <span class="{cls}">{arrow} {abs(pc):.0f}%</span> vs {dt.date.fromisoformat(full[-2]["month"] + "-01").strftime("%B")}</p>'
+    ytd = sum(m['sales'] for m in months)
+    upd = dlong(data['generated_at'])
+    block = f'''<!--PULSE-->
+<section class="pulse" aria-labelledby="pulse-title">
+  <div class="wrap">
+    <div class="pulse-card">
+      <div class="pulse-top"><div><p class="eyebrow pulse-live">Dubai market this week</p><h2 id="pulse-title">Every sale and rent, from the Land Department.</h2></div><span class="src">Updated {upd} · Source: Dubai Land Department</span></div>
+      <div class="pulse-grid">
+        <dl class="pulse-stats">
+          <div><dt>Sales</dt><dd>{num(d['sales_count'])}</dd><small>last 90 days</small></div>
+          <div><dt>Value</dt><dd>{bn(d['sales_value'])}</dd><small>last 90 days</small></div>
+          <div><dt>Off-plan</dt><dd>{pct(d['offplan_share'])}</dd><small>of sales</small></div>
+          <div><dt>Price / sq ft</dt><dd>{aed(d['median_psf_units'])}</dd><small>median, apartments</small></div>
+          <div><dt>Rent / year</dt><dd>{aed(d['median_rent_flats'])}</dd><small>median flat, new contracts</small></div>
+          <div><dt>Sales this year</dt><dd>{num(ytd)}</dd><small>since 1 January</small></div>
+        </dl>
+        <div class="pulse-chart"><span class="lbl">Sales by month</span>{chg}{spark(months)}</div>
+      </div>
+      <div class="pulse-links"><a href="/market/">Prices and rents by community →</a><a href="/valuation/">What is your home worth? →</a></div>
+    </div>
+  </div>
+</section>
+<!--/PULSE-->'''
+    s = re.sub(r'<!--PULSE-->.*?<!--/PULSE-->', lambda m: block, s, flags=re.S)
+    comm = [c for c in data.get('communities', []) if c.get('median_psf')]
+    if comm and '<!--TICKER-->' in s:
+        pin = '<svg width="18" height="18" viewBox="0 0 34 34" aria-hidden="true"><use href="#pin" fill="#E8A33D"/></svg>'
+        items = ''.join(f'<span><b>{html.escape(c["name"].split(" ")[0])}</b> {html.escape(" ".join(c["name"].split(" ")[1:]))} <small style="font-size:.6em;font-weight:600;color:var(--saffron-text);letter-spacing:0">AED {c["median_psf"]:,}/sq ft</small>{pin}</span>' for c in comm)
+        s = re.sub(r'<!--TICKER-->.*?<!--/TICKER-->', lambda m: '<!--TICKER-->' + items + items + '<!--/TICKER-->', s, flags=re.S)
+    open('index.html', 'w').write(s)
+    print('homepage market band updated')
 
 if __name__ == '__main__':
     main()
