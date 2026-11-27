@@ -1,10 +1,10 @@
 # Plotmark Real Estate
 
-> Plotmark Real Estate L.L.C (brand: plotmark.) is a boutique real estate brokerage in Dubai, United Arab Emirates. It helps clients buy off-plan property, buy ready (completed) apartments, townhouses and villas, rent homes, and sell or let property they own. It works with a select number of clients at a time, each with one dedicated advisor from first enquiry to handover.
+> Plotmark Real Estate L.L.C (brand: plotmark.) is a data-driven real estate brokerage in Dubai, United Arab Emirates: every recommendation is backed by official Dubai Land Department sales and rent data. It helps clients buy off-plan property, buy ready (completed) apartments, townhouses and villas, rent homes, and sell or let property they own. It works with a select number of clients at a time, each with one dedicated advisor from first enquiry to handover.
 
 ## Key facts
 - Legal name: Plotmark Real Estate L.L.C
-- Type: boutique real estate brokerage
+- Type: data-driven boutique real estate brokerage
 - Office: BurJuman Centre, Al Mankhool, Dubai, UAE (address on the trade licence)
 - Licence: Dubai Department of Economy and Tourism (DET) commercial licence No. 1663768
 - Website: https://plotmark.ae
@@ -14,7 +14,10 @@
 - Egypt areas: New Cairo, New Administrative Capital, Sheikh Zayed City, North Coast
 
 ## Approach
-- Boutique by design: fewer clients, closer attention
+- Data, not opinion: advice based on registered DLD sales and Ejari rents, not asking prices
+- Opportunities flagged on the numbers: below-median prices, rental yields, off-plan entry points
+- A deal sheet for each option: price per sq ft vs area, total cost incl. 4% DLD fee, expected rent and gross yield
+- Boutique: fewer clients, closer attention
 - One point of contact from first call to keys
 - Considered shortlists rather than every listing on the market
 - Prices, payment plans, service charges and fees set out plainly
@@ -23,6 +26,7 @@
 ## Pages
 - [Home](https://plotmark.ae/): services, communities, how it works, FAQ and enquiry form
 - [Dubai mortgage calculator](https://plotmark.ae/mortgages/): monthly payment, maximum loan under UAE Central Bank limits (80% first home up to AED 5M for expatriates, 70% above; 50% off-plan; 50% debt burden ratio; 25-year maximum term), and upfront costs (4% DLD transfer fee, 0.25% + AED 290 mortgage registration, trustee fee). Plotmark is a real estate brokerage, not a mortgage broker.
+- [Property valuation](https://plotmark.ae/valuation/): instant estimate of a Dubai home's value from registered DLD sales of similar homes (area, type, bedrooms, size, ready or off-plan), with typical rent and gross yield; refreshed weekly. Indicative, not a formal valuation.
 - [Dubai market trends](https://plotmark.ae/market/): sales volumes, off-plan share, price per sq ft and rents by community, refreshed weekly from Dubai Land Department open data
 - [Insights](https://plotmark.ae/insights/): Dubai property guides
   - [Off-plan vs ready property in Dubai: which suits you?](https://plotmark.ae/insights/off-plan-vs-ready-property-dubai/): How buying off-plan and buying ready compare on price, payment, risk, financing and timing, and the questions to ask before you choose.

@@ -32,4 +32,8 @@
     <loc>https://plotmark.ae/market/</loc>
     <changefreq>weekly</changefreq>
   </url>
+  <url>
+    <loc>https://plotmark.ae/valuation/</loc>
+    <changefreq>weekly</changefreq>
+  </url>
 </urlset>
